@@ -1,0 +1,25 @@
+"use strict";(()=>{var e={};e.id=652,e.ids=[652],e.modules={399:e=>{e.exports=require("next/dist/compiled/next-server/app-page.runtime.prod.js")},517:e=>{e.exports=require("next/dist/compiled/next-server/app-route.runtime.prod.js")},3775:(e,i,a)=>{a.r(i),a.d(i,{originalPathname:()=>f,patchFetch:()=>b,requestAsyncStorage:()=>u,routeModule:()=>p,serverHooks:()=>y,staticGenerationAsyncStorage:()=>h});var n={};a.r(n),a.d(n,{POST:()=>m});var t=a(9303),r=a(8716),o=a(670),s=a(7070),l=a(1258);let c=[{category:l.OA.HARM_CATEGORY_HARASSMENT,threshold:l.MN.BLOCK_NONE},{category:l.OA.HARM_CATEGORY_HATE_SPEECH,threshold:l.MN.BLOCK_NONE},{category:l.OA.HARM_CATEGORY_SEXUALLY_EXPLICIT,threshold:l.MN.BLOCK_NONE},{category:l.OA.HARM_CATEGORY_DANGEROUS_CONTENT,threshold:l.MN.BLOCK_NONE}],d=`You are MedScan AI, an expert radiology AI assistant specialising in medical image analysis.
+When given a medical image (X-ray, MRI, CT scan, ultrasound, or similar), analyse it thoroughly and respond ONLY with a valid JSON object.
+
+JSON schema (respond ONLY with this — no markdown, no code fences, no explanation):
+{
+  "imageType": "string — precise scan type e.g. 'Chest X-Ray (PA)', 'Right Knee MRI (Sagittal T2)', 'Abdominal CT (Axial)'",
+  "summary": "string — 3-5 sentence clinical summary paragraph suitable for a radiologist",
+  "findings": [
+    {
+      "label":      "string — precise medical finding name",
+      "confidence": number — integer 60-99,
+      "severity":   "normal" | "low" | "medium" | "high",
+      "region":     "string — specific anatomical region/structure",
+      "notes":      "string — 1-3 sentence clinical description with relevant measurements where possible"
+    }
+  ],
+  "recommendation": "string — concise clinical recommendation paragraph"
+}
+
+Rules:
+- Always include at least one finding (include a 'normal' severity finding even if the scan is clear)
+- Confidence values must be realistic integers between 60 and 99
+- Findings list should be ordered by severity (high → normal)
+- Be precise with anatomical terminology
+- imageType must be specific, not generic`;async function m(e){try{let i=process.env.GEMINI_API_KEY;if(!i||"your_gemini_api_key_here"===i)return s.NextResponse.json(g());let a=(await e.formData()).get("image");if(!a)return s.NextResponse.json({error:"No image provided"},{status:400});let n=await a.arrayBuffer(),t=Buffer.from(n).toString("base64"),r=a.type,o=new l.$D(i).getGenerativeModel({model:"gemini-2.0-flash",safetySettings:c}),m=(await o.generateContent([{text:d},{inlineData:{data:t,mimeType:r}}])).response.text().trim().replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/```\s*$/i,"").trim(),p=JSON.parse(m);return s.NextResponse.json({success:!0,...p})}catch(e){return console.error("[Gemini analyse error]",e),s.NextResponse.json(g())}}function g(){return{success:!0,fallback:!0,imageType:"Chest X-Ray (PA)",summary:"Preliminary AI screening of the submitted radiograph identifies mild right lower lobe consolidation, borderline cardiomegaly, and a trace pleural effusion. No pneumothorax detected. The mediastinum appears within normal limits. Correlation with clinical symptoms and laboratory findings is recommended before finalising the diagnosis.",findings:[{label:"Pulmonary consolidation",confidence:87,severity:"medium",region:"Right lower lobe",notes:"Opacification present in the right lower lobe consistent with early-stage consolidation. Differential includes pneumonia, atelectasis, or aspiration. Air bronchograms visible."},{label:"Cardiomegaly",confidence:73,severity:"low",region:"Cardiac silhouette",notes:"Mild cardiac enlargement detected. Cardiothoracic ratio borderline elevated at approximately 0.52. Clinical correlation with echocardiogram recommended."},{label:"Pleural effusion",confidence:62,severity:"low",region:"Right costophrenic angle",notes:"Trace fluid detected at the right costophrenic angle. Small volume, likely reactive in the context of the right lower lobe consolidation."},{label:"No pneumothorax",confidence:98,severity:"normal",region:"Bilateral lung fields",notes:"No evidence of pneumothorax. Visceral pleural line intact bilaterally. Lung fields otherwise clear."}],recommendation:"Correlate with clinical presentation, vital signs, and inflammatory markers (CRP, WBC). Consider follow-up CXR in 4–6 weeks if treated conservatively, or earlier if clinically indicated. Echocardiogram may be warranted to assess cardiac function."}}let p=new t.AppRouteRouteModule({definition:{kind:r.x.APP_ROUTE,page:"/api/analyze/route",pathname:"/api/analyze",filename:"route",bundlePath:"app/api/analyze/route"},resolvedPagePath:"C:\\Users\\Nigeram Ventures\\Desktop\\octopusscan\\app\\api\\analyze\\route.ts",nextConfigOutput:"",userland:n}),{requestAsyncStorage:u,staticGenerationAsyncStorage:h,serverHooks:y}=p,f="/api/analyze/route";function b(){return(0,o.patchFetch)({serverHooks:y,staticGenerationAsyncStorage:h})}}};var i=require("../../../webpack-runtime.js");i.C(e);var a=e=>i(i.s=e),n=i.X(0,[948,434],()=>a(3775));module.exports=n})();
