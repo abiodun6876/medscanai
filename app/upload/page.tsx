@@ -482,7 +482,7 @@ export default function UploadPage() {
                       </p>
                       <p className="text-sm text-slate-400 leading-relaxed">{result.recommendation}</p>
                       <p className="mt-3 text-xs text-slate-600">
-                        ⚠ AI pre-screening only — consult a licensed physician.
+                        ⚠ AI pre-screening only.
                       </p>
                     </div>
                   )}
