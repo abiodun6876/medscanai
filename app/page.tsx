@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const stats = [
   { value: '98.7%', label: 'AI Accuracy', icon: '🎯' },
-  { value: '< 2s', label: 'Analysis Time', icon: '⚡' },
+  { value: '< 30s', label: 'Analysis Time', icon: '⚡' },
   { value: '50K+', label: 'Scans Analysed', icon: '🔬' },
   { value: 'HIPAA', label: 'Compliant', icon: '🔒' },
 ];
@@ -45,7 +45,7 @@ const features = [
     color: 'text-emerald-400',
     bg: 'bg-emerald-400/10 border-emerald-400/20',
     button: '/upload',
-    buttonText: 'Try Now →'
+    buttonText: 'Analyze →'
   },
   {
     icon: (
@@ -88,49 +88,49 @@ const features = [
   },
 ];
 
-// New advanced features section
+// Advanced features - these are TOOLS within the upload page
 const advancedFeatures = [
   {
     icon: '📏',
     title: 'Measurement Tools',
     desc: 'Precise distance, angle, and area measurements with automatic calibration.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
   {
     icon: '🔲',
     title: 'ROI Analysis',
     desc: 'Region of Interest analysis with density measurements and statistics.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
   {
     icon: '🔄',
     title: 'Study Comparison',
     desc: 'Side-by-side, overlay, and linked comparison with prior studies.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
   {
     icon: '🏷️',
     title: 'Anatomical Landmarks',
     desc: 'AI-powered detection of anatomical landmarks with confidence scores.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
   {
     icon: '📷',
     title: 'DICOM Viewer',
     desc: 'Full DICOM support with window leveling and metadata extraction.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
   {
     icon: '🔍',
     title: 'Image Enhancement',
     desc: 'Zoom, pan, brightness, and contrast controls for detailed review.',
-    button: '/upload',
-    badge: 'NEW'
+    tooltip: 'Available after uploading an image',
+    path: '/upload'
   },
 ];
 
@@ -197,45 +197,46 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Advanced Features Section - NEW */}
+      {/* Advanced Features Section - Tools available AFTER upload */}
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-medium text-brand-300 mb-4">
-              🚀 Just Released
+              🚀 Professional Tools
             </div>
             <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
-              Professional{' '}
-              <span className="gradient-text">Medical Imaging</span> Tools
+              Advanced{' '}
+              <span className="gradient-text">Imaging Tools</span>
             </h2>
             <p className="mt-4 text-slate-400 max-w-xl mx-auto">
-              Advanced features typically found in enterprise PACS systems, now available in your browser.
+              Upload an image to unlock these professional medical imaging tools
             </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {advancedFeatures.map((feature) => (
-              <div key={feature.title} className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+              <Link
+                key={feature.title}
+                href={feature.path}
+                className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300 cursor-pointer group"
+              >
                 <div className="flex items-center justify-between">
                   <div className="text-4xl">{feature.icon}</div>
-                  {feature.badge && (
-                    <span className="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-full">
-                      {feature.badge}
-                    </span>
-                  )}
+                  <span className="text-xs bg-slate-700/50 text-slate-400 px-2 py-1 rounded-full group-hover:bg-brand-500/20 group-hover:text-brand-300 transition">
+                    Available after upload
+                  </span>
                 </div>
-                <h3 className="mt-4 font-display font-semibold text-white text-lg">{feature.title}</h3>
+                <h3 className="mt-4 font-display font-semibold text-white text-lg group-hover:text-brand-400 transition">
+                  {feature.title}
+                </h3>
                 <p className="mt-2 text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
-                <Link
-                  href={feature.button}
-                  className="mt-4 inline-flex items-center gap-1 text-sm text-brand-400 hover:text-brand-300 transition"
-                >
-                  Try it now
+                <div className="mt-4 flex items-center gap-1 text-sm text-slate-500 group-hover:text-brand-400 transition">
+                  Upload to use
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </Link>
-              </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -274,27 +275,42 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo Video / Interactive Demo Section */}
+      {/* How It Works Section */}
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-5xl">
-          <div className="glass-card rounded-3xl p-8 text-center">
-            <h2 className="font-display text-2xl font-bold text-white mb-4">
-              See MedScan AI in Action
+          <div className="glass-card rounded-3xl p-8">
+            <h2 className="text-center font-display text-2xl font-bold text-white mb-8">
+              How MedScan AI Works
             </h2>
-            <p className="text-slate-400 mb-6">
-              Watch how our AI analyzes a chest X-ray in under 30 seconds
-            </p>
-            <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="text-6xl mb-4">🎥</div>
-                <p className="text-slate-400">Demo video coming soon</p>
-                <Link href="/upload" className="mt-4 inline-flex items-center gap-2 text-brand-400 hover:text-brand-300">
-                  Try it yourself instead
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-500/20 flex items-center justify-center text-2xl mb-4">
+                  📸
+                </div>
+                <h3 className="font-semibold text-white mb-2">1. Upload</h3>
+                <p className="text-sm text-slate-400">Drag & drop any medical image</p>
               </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-500/20 flex items-center justify-center text-2xl mb-4">
+                  🧠
+                </div>
+                <h3 className="font-semibold text-white mb-2">2. Analyze</h3>
+                <p className="text-sm text-slate-400">AI processes in under 30 seconds</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-500/20 flex items-center justify-center text-2xl mb-4">
+                  📋
+                </div>
+                <h3 className="font-semibold text-white mb-2">3. Report</h3>
+                <p className="text-sm text-slate-400">Get structured clinical findings</p>
+              </div>
+            </div>
+
+            {/* Tooltip note */}
+            <div className="mt-8 text-center">
+              <p className="text-xs text-slate-500">
+                💡 After uploading, you'll have access to: Measurement Tools, ROI Analysis, Study Comparison, Anatomical Landmarks, and more
+              </p>
             </div>
           </div>
         </div>
@@ -368,7 +384,7 @@ export default function Home() {
             </p>
             <div className="relative mt-8 flex flex-wrap gap-4 justify-center">
               <Link href="/upload" className="btn-primary text-base px-8 py-3">
-                Get Started — It&apos;s Free
+                Get Started — It's Free
               </Link>
               <Link href="/reports" className="btn-outline text-base px-8 py-3">
                 View Sample Report
@@ -384,7 +400,7 @@ export default function Home() {
           <div className="flex items-center gap-2 text-slate-500 text-sm">
             <span className="font-display font-semibold text-slate-400">MedScan AI</span>
             <span>·</span>
-            <span>© 2025</span>
+            <span>© 2026</span>
           </div>
           <div className="flex gap-6 text-sm text-slate-500">
             <Link href="/auth" className="hover:text-slate-300 transition">Privacy</Link>
