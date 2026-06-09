@@ -172,7 +172,7 @@ export default function ImageAnalyzer() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-4">
-            Note: This is a general image classifier. For medical diagnosis, please consult a healthcare professional.
+            NOTE: This is a general image classifier. For medical diagnosis, please consult a healthcare professional.
           </p>
         </div>
       )}
