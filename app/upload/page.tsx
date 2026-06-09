@@ -7,7 +7,6 @@ import { auth } from '../../lib/firebase';
 import { FindingCard } from '../../components/FindingCard';
 import { AiChatPanel } from '../../components/AiChatPanel';
 
-
 type Stage = 'idle' | 'analysing' | 'done' | 'error';
 
 interface ScanResult {
@@ -68,7 +67,12 @@ export default function UploadPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [recentScans, setRecentScans] = useState<RecentScan[]>([]);
   
+  // NEW: State for advanced tools
+  const [showAdvancedTools, setShowAdvancedTools] = useState(false);
+  const [activeTool, setActiveTool] = useState<string | null>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Check auth state
   useEffect(() => {
@@ -115,6 +119,7 @@ export default function UploadPage() {
     setResult(null);
     setErrorMsg('');
     setProgress(0);
+    setActiveTool(null); // Reset active tool when new file is uploaded
   };
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -274,6 +279,8 @@ export default function UploadPage() {
     setScanId('');
     setErrorMsg('');
     setProgress(0);
+    setActiveTool(null);
+    setShowAdvancedTools(false);
   };
 
   const scanContextForChat = result
@@ -285,6 +292,16 @@ export default function UploadPage() {
     month: 'long',
     day: 'numeric',
   });
+
+  // Advanced tools configuration
+  const advancedTools = [
+    { id: 'measurements', icon: '📏', name: 'Measurements', description: 'Distance, angle, and area tools' },
+    { id: 'roi', icon: '🔲', name: 'ROI Analysis', description: 'Region density and statistics' },
+    { id: 'comparison', icon: '🔄', name: 'Comparison', description: 'Side-by-side with prior studies' },
+    { id: 'landmarks', icon: '🏷️', name: 'Landmarks', description: 'Anatomical landmark detection' },
+    { id: 'dicom', icon: '📷', name: 'DICOM', description: 'Medical imaging format support' },
+    { id: 'enhancement', icon: '🔍', name: 'Enhancement', description: 'Zoom, brightness, contrast' },
+  ];
 
   return (
     <>
@@ -437,7 +454,12 @@ export default function UploadPage() {
                 >
                   {preview ? (
                     <div className="relative">
-                      <img src={preview} alt="Scan preview" className="w-full h-80 object-contain p-4" />
+                      <img 
+                        ref={imageRef}
+                        src={preview} 
+                        alt="Scan preview" 
+                        className="w-full h-80 object-contain p-4" 
+                      />
                       {stage === 'analysing' && (
                         <div className="absolute inset-0 overflow-hidden">
                           <div className="animate-scan absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
@@ -506,6 +528,66 @@ export default function UploadPage() {
                     <span className="text-xs text-teal-400 font-medium bg-teal-400/10 border border-teal-400/20 rounded-full px-2.5 py-1">
                       Ready
                     </span>
+                  </div>
+                )}
+
+                {/* ===== NEW: ADVANCED IMAGING TOOLS TOOLBAR ===== */}
+                {file && stage === 'idle' && (
+                  <div className="space-y-3 animate-fade-in-up">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-sm font-semibold ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                        🛠️ Advanced Imaging Tools
+                      </h3>
+                      <button
+                        onClick={() => setShowAdvancedTools(!showAdvancedTools)}
+                        className={`text-xs transition ${
+                          darkMode ? 'text-brand-400 hover:text-brand-300' : 'text-brand-600 hover:text-brand-700'
+                        }`}
+                      >
+                        {showAdvancedTools ? 'Hide Tools ▲' : 'Show Tools ▼'}
+                      </button>
+                    </div>
+                    
+                    {showAdvancedTools && (
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50">
+                        {advancedTools.map((tool) => (
+                          <button
+                            key={tool.id}
+                            onClick={() => setActiveTool(activeTool === tool.id ? null : tool.id)}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${
+                              activeTool === tool.id
+                                ? 'bg-brand-500/30 border-brand-500/50 text-brand-400 scale-105'
+                                : `${darkMode ? 'bg-slate-800/50 hover:bg-slate-700/50' : 'bg-slate-200/50 hover:bg-slate-300/50'} border-slate-700/30 text-slate-400 hover:text-white`
+                            } border`}
+                            title={tool.description}
+                          >
+                            <span className="text-xl">{tool.icon}</span>
+                            <span className="text-[10px] font-medium">{tool.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Active Tool Info Panel */}
+                    {activeTool && (
+                      <div className={`p-3 rounded-lg text-xs ${
+                        darkMode ? 'bg-slate-800/50 text-slate-300' : 'bg-slate-100 text-slate-700'
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{advancedTools.find(t => t.id === activeTool)?.icon}</span>
+                          <span className="font-semibold">{advancedTools.find(t => t.id === activeTool)?.name}</span>
+                          <span className="text-slate-500">— {advancedTools.find(t => t.id === activeTool)?.description}</span>
+                        </div>
+                        <div className="mt-2 text-slate-400 text-[10px]">
+                          {activeTool === 'measurements' && '💡 Click two points for distance, three points for angle, or draw polygon for area'}
+                          {activeTool === 'roi' && '💡 Click and drag to select region of interest for density analysis'}
+                          {activeTool === 'comparison' && '💡 Upload a prior study to compare side-by-side or overlay'}
+                          {activeTool === 'landmarks' && '💡 AI will detect anatomical landmarks automatically'}
+                          {activeTool === 'dicom' && '💡 Support for DICOM medical imaging format'}
+                          {activeTool === 'enhancement' && '💡 Use zoom, pan, brightness, and contrast controls'}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
