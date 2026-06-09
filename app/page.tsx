@@ -18,6 +18,8 @@ const features = [
     desc: 'Role-based access for patients, doctors, and clinics with HIPAA-compliant data handling.',
     color: 'text-brand-400',
     bg: 'bg-brand-500/10 border-brand-500/20',
+    button: '/auth',
+    buttonText: 'Sign In →'
   },
   {
     icon: (
@@ -29,6 +31,8 @@ const features = [
     desc: 'Drag-and-drop X-ray, PNG, JPG, JPEG upload with instant preview and file validation.',
     color: 'text-teal-400',
     bg: 'bg-teal-500/10 border-teal-500/20',
+    button: '/upload',
+    buttonText: 'Upload →'
   },
   {
     icon: (
@@ -40,6 +44,8 @@ const features = [
     desc: 'Get AI-generated findings with confidence scores, anomaly detection, and clinical notes.',
     color: 'text-emerald-400',
     bg: 'bg-emerald-400/10 border-emerald-400/20',
+    button: '/upload',
+    buttonText: 'Try Now →'
   },
   {
     icon: (
@@ -51,6 +57,8 @@ const features = [
     desc: 'Download structured PDF reports with findings, timestamps, and doctor validation status.',
     color: 'text-amber-400',
     bg: 'bg-amber-400/10 border-amber-400/20',
+    button: '/reports',
+    buttonText: 'View Sample →'
   },
   {
     icon: (
@@ -62,6 +70,8 @@ const features = [
     desc: 'Clinicians can validate AI findings, add notes, and approve reports for clinical use.',
     color: 'text-rose-400',
     bg: 'bg-rose-400/10 border-rose-400/20',
+    button: '/dashboard',
+    buttonText: 'Doctor Portal →'
   },
   {
     icon: (
@@ -73,6 +83,54 @@ const features = [
     desc: 'Track all past scans in a searchable dashboard with status indicators and quick access.',
     color: 'text-brand-300',
     bg: 'bg-brand-300/10 border-brand-300/20',
+    button: '/dashboard',
+    buttonText: 'View History →'
+  },
+];
+
+// New advanced features section
+const advancedFeatures = [
+  {
+    icon: '📏',
+    title: 'Measurement Tools',
+    desc: 'Precise distance, angle, and area measurements with automatic calibration.',
+    button: '/upload',
+    badge: 'NEW'
+  },
+  {
+    icon: '🔲',
+    title: 'ROI Analysis',
+    desc: 'Region of Interest analysis with density measurements and statistics.',
+    button: '/upload',
+    badge: 'NEW'
+  },
+  {
+    icon: '🔄',
+    title: 'Study Comparison',
+    desc: 'Side-by-side, overlay, and linked comparison with prior studies.',
+    button: '/upload',
+    badge: 'NEW'
+  },
+  {
+    icon: '🏷️',
+    title: 'Anatomical Landmarks',
+    desc: 'AI-powered detection of anatomical landmarks with confidence scores.',
+    button: '/upload',
+    badge: 'NEW'
+  },
+  {
+    icon: '📷',
+    title: 'DICOM Viewer',
+    desc: 'Full DICOM support with window leveling and metadata extraction.',
+    button: '/upload',
+    badge: 'NEW'
+  },
+  {
+    icon: '🔍',
+    title: 'Image Enhancement',
+    desc: 'Zoom, pan, brightness, and contrast controls for detailed review.',
+    button: '/upload',
+    badge: 'NEW'
   },
 ];
 
@@ -139,7 +197,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Advanced Features Section - NEW */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-500/30 bg-brand-500/10 px-4 py-1.5 text-xs font-medium text-brand-300 mb-4">
+              🚀 Just Released
+            </div>
+            <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
+              Professional{' '}
+              <span className="gradient-text">Medical Imaging</span> Tools
+            </h2>
+            <p className="mt-4 text-slate-400 max-w-xl mx-auto">
+              Advanced features typically found in enterprise PACS systems, now available in your browser.
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {advancedFeatures.map((feature) => (
+              <div key={feature.title} className="glass-card rounded-2xl p-6 hover:scale-105 transition-transform duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="text-4xl">{feature.icon}</div>
+                  {feature.badge && (
+                    <span className="text-xs bg-brand-500/20 text-brand-300 px-2 py-1 rounded-full">
+                      {feature.badge}
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-4 font-display font-semibold text-white text-lg">{feature.title}</h3>
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
+                <Link
+                  href={feature.button}
+                  className="mt-4 inline-flex items-center gap-1 text-sm text-brand-400 hover:text-brand-300 transition"
+                >
+                  Try it now
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features Grid */}
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-6xl">
           <div className="text-center mb-14">
@@ -154,14 +256,46 @@ export default function Home() {
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
-              <div key={f.title} className="glass-card rounded-2xl p-6">
+              <div key={f.title} className="glass-card rounded-2xl p-6 group hover:border-slate-700 transition-all duration-300">
                 <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl border ${f.bg} ${f.color}`}>
                   {f.icon}
                 </div>
                 <h3 className="mt-4 font-display font-semibold text-white text-lg">{f.title}</h3>
                 <p className="mt-2 text-sm text-slate-400 leading-relaxed">{f.desc}</p>
+                <Link
+                  href={f.button}
+                  className="mt-4 inline-flex items-center gap-1 text-sm text-slate-400 group-hover:text-brand-400 transition"
+                >
+                  {f.buttonText}
+                </Link>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video / Interactive Demo Section */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-5xl">
+          <div className="glass-card rounded-3xl p-8 text-center">
+            <h2 className="font-display text-2xl font-bold text-white mb-4">
+              See MedScan AI in Action
+            </h2>
+            <p className="text-slate-400 mb-6">
+              Watch how our AI analyzes a chest X-ray in under 30 seconds
+            </p>
+            <div className="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-6xl mb-4">🎥</div>
+                <p className="text-slate-400">Demo video coming soon</p>
+                <Link href="/upload" className="mt-4 inline-flex items-center gap-2 text-brand-400 hover:text-brand-300">
+                  Try it yourself instead
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -208,6 +342,11 @@ export default function Home() {
                     }`}>
                       {scan.status}
                     </span>
+                    <Link href={`/reports/${scan.id}`} className="text-slate-500 hover:text-slate-300 transition">
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
                 </div>
               ))}
