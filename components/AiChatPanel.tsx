@@ -8,10 +8,11 @@ interface Message {
 }
 
 interface AiChatPanelProps {
-  scanContext: string; // stringified scan summary + findings
+  scanContext: string;
+  darkMode?: boolean;  // Add this prop
 }
 
-export function AiChatPanel({ scanContext }: AiChatPanelProps) {
+export function AiChatPanel({ scanContext, darkMode = false }: AiChatPanelProps) {
   const [open,     setOpen]     = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -64,6 +65,17 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
     'Explain in simple terms',
   ];
 
+  // Dynamic styles based on darkMode
+  const chatBg = darkMode ? 'bg-slate-900/95' : 'bg-white/95';
+  const borderColor = darkMode ? 'border-slate-700/60' : 'border-slate-200';
+  const textColor = darkMode ? 'text-white' : 'text-slate-800';
+  const textSecondary = darkMode ? 'text-slate-400' : 'text-slate-500';
+  const inputBg = darkMode ? 'bg-slate-800' : 'bg-slate-100';
+  const userMsgBg = darkMode ? 'bg-brand-600' : 'bg-brand-500';
+  const aiMsgBg = darkMode ? 'bg-slate-800' : 'bg-slate-100';
+  const suggestionBg = darkMode ? 'bg-brand-500/20 border-brand-500/30' : 'bg-brand-100 border-brand-200';
+  const suggestionHover = darkMode ? 'hover:bg-brand-500/30' : 'hover:bg-brand-200';
+
   return (
     <>
       {/* Floating chat button */}
@@ -92,19 +104,19 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-2xl glass border border-slate-700/60 shadow-2xl shadow-black/40 flex flex-col overflow-hidden animate-fade-in-up">
+        <div className={`fixed bottom-24 right-6 z-50 w-80 sm:w-96 rounded-2xl border ${borderColor} shadow-2xl shadow-black/40 flex flex-col overflow-hidden animate-fade-in-up ${chatBg}`}>
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-800/60 bg-slate-900/80">
+          <div className={`flex items-center gap-3 px-4 py-3 border-b ${borderColor}`}>
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-brand-500 to-teal-500 flex items-center justify-center flex-shrink-0">
               <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5" />
               </svg>
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">MedScan AI Assistant</p>
+              <p className={`text-sm font-semibold ${textColor}`}>MedScan AI Assistant</p>
               <p className="text-xs text-emerald-400 flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block" />
-                Online · Powered by Claude AI
+                Online · Powered by GPT-4
               </p>
             </div>
           </div>
@@ -115,8 +127,8 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-brand-500 text-white rounded-tr-sm'
-                    : 'bg-slate-800/80 border border-slate-700/60 text-slate-300 rounded-tl-sm'
+                    ? `${userMsgBg} text-white rounded-tr-sm`
+                    : `${aiMsgBg} ${darkMode ? 'text-slate-300' : 'text-slate-700'} rounded-tl-sm border ${borderColor}`
                 }`}>
                   {msg.content}
                 </div>
@@ -124,7 +136,7 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                <div className={`rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5 ${aiMsgBg} border ${borderColor}`}>
                   <span className="h-1.5 w-1.5 rounded-full bg-brand-400 animate-bounce [animation-delay:-0.3s]" />
                   <span className="h-1.5 w-1.5 rounded-full bg-brand-400 animate-bounce [animation-delay:-0.15s]" />
                   <span className="h-1.5 w-1.5 rounded-full bg-brand-400 animate-bounce" />
@@ -141,7 +153,7 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
                 <button
                   key={s}
                   onClick={() => { setInput(s); }}
-                  className="text-xs px-2.5 py-1 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 hover:bg-brand-500/20 transition"
+                  className={`text-xs px-2.5 py-1 rounded-full border transition ${suggestionBg} ${suggestionHover} ${darkMode ? 'text-brand-300' : 'text-brand-700'}`}
                 >
                   {s}
                 </button>
@@ -150,8 +162,8 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
           )}
 
           {/* Input */}
-          <div className="px-3 py-3 border-t border-slate-800/60">
-            <div className="flex items-center gap-2 rounded-xl bg-slate-900/80 border border-slate-700/60 px-3 py-2">
+          <div className={`px-3 py-3 border-t ${borderColor}`}>
+            <div className={`flex items-center gap-2 rounded-xl ${inputBg} border ${borderColor} px-3 py-2`}>
               <input
                 id="ai-chat-input"
                 type="text"
@@ -159,14 +171,14 @@ export function AiChatPanel({ scanContext }: AiChatPanelProps) {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
                 placeholder="Ask about your scan…"
-                className="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-600 outline-none"
+                className={`flex-1 bg-transparent text-xs ${darkMode ? 'text-slate-200 placeholder-slate-500' : 'text-slate-800 placeholder-slate-400'} outline-none`}
                 disabled={loading}
               />
               <button
                 onClick={send}
                 disabled={!input.trim() || loading}
                 id="ai-chat-send"
-                className="h-7 w-7 rounded-lg bg-brand-500 flex items-center justify-center text-white disabled:opacity-40 hover:bg-brand-400 transition flex-shrink-0"
+                className="h-7 w-7 rounded-lg bg-gradient-to-r from-brand-500 to-teal-500 flex items-center justify-center text-white disabled:opacity-40 hover:from-brand-600 hover:to-teal-600 transition flex-shrink-0"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />

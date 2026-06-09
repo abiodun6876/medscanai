@@ -8,6 +8,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   onSnapshot,
   serverTimestamp,
   Timestamp,
@@ -70,6 +71,28 @@ export async function getUserScans(): Promise<ScanRecord[]> {
   );
   const snap = await getDocs(q);
   return mapSnap(snap);
+}
+
+// ── Get recent scans for the current user (limited) ─────────────────────────
+export async function getRecentScans(limitCount: number = 5): Promise<{ id: string; type: string; date: string; summary: string }[]> {
+  const uid = auth.currentUser?.uid ?? 'anonymous';
+  const q = query(
+    collection(db, SCANS),
+    where('uid', '==', uid),
+    orderBy('createdAt', 'desc'),
+    limit(limitCount)
+  );
+  const snap = await getDocs(q);
+  return snap.docs.map((doc) => {
+    const data = doc.data();
+    const createdAt = data.createdAt?.toDate();
+    return {
+      id: doc.id,
+      type: data.type || 'Medical Image',
+      date: createdAt ? createdAt.toLocaleDateString() : new Date().toLocaleDateString(),
+      summary: data.summary || 'No summary available',
+    };
+  });
 }
 
 // ── Real-time listener for current user's scans ────────────────────────────
