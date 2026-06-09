@@ -99,124 +99,125 @@ export default function UploadPage() {
   };
 
   const runAnalysis = async () => {
-    if (!file) return;
+  if (!file) return;
+  
+  if (!OPENROUTER_API_KEY) {
+    setErrorMsg('API key not configured. Please add NEXT_PUBLIC_OPENROUTER_API_KEY to .env.local');
+    setStage('error');
+    return;
+  }
+  
+  setStage('analysing');
+  setErrorMsg('');
+  setProgress(0);
+  
+  try {
+    const interval = setInterval(() => {
+      setProgress(p => Math.min(p + 10, 90));
+    }, 300);
     
-    if (!OPENROUTER_API_KEY) {
-      setErrorMsg('API key not configured. Please add NEXT_PUBLIC_OPENROUTER_API_KEY to .env.local');
-      setStage('error');
-      return;
+    // Convert image to base64
+    const arrayBuffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    
+    setProgress(30);
+    
+    // Call OpenRouter API with working model
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://medscanai-amber.vercel.app',
+        'X-Title': 'MedScan AI',  // Changed from X-OpenRouter-Title
+      },
+      body: JSON.stringify({
+        model: 'openai/gpt-4o',  // Working vision model
+        max_tokens: 1024,
+        messages: [
+          {
+            role: 'system',
+            content: SYSTEM_PROMPT,
+          },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Analyze this medical image. Return ONLY valid JSON matching the schema. No markdown, no explanation, just the JSON object.',
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${file.type};base64,${base64}`,
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+    
+    setProgress(70);
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error('API Error:', errorData);
+      throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
     }
     
-    setStage('analysing');
-    setErrorMsg('');
-    setProgress(0);
+    const data = await response.json();
+    const rawText = data.choices[0].message.content;
     
-    try {
-      const interval = setInterval(() => {
-        setProgress(p => Math.min(p + 10, 90));
-      }, 300);
-      
-      // Convert image to base64
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = '';
-      for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      const base64 = btoa(binary);
-      
-      setProgress(30);
-      
-      // Call OpenRouter API with GPT-4 Vision
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': 'https://medscanai.vercel.app',
-          'X-OpenRouter-Title': 'MedScan AI',
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-4-vision-preview',
-          max_tokens: 1024,
-          messages: [
-            {
-              role: 'system',
-              content: SYSTEM_PROMPT,
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Analyze this medical image. Return ONLY valid JSON matching the schema. No markdown, no explanation, just the JSON object.',
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: `data:${file.type};base64,${base64}`,
-                  },
-                },
-              ],
-            },
-          ],
-        }),
-      });
-      
-      setProgress(70);
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
-      }
-      
-      const data = await response.json();
-      const rawText = data.choices[0].message.content;
-      
-      setProgress(85);
-      
-      console.log('OpenRouter response:', rawText);
-      
-      // Parse JSON response
-      let jsonText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) jsonText = jsonMatch[0];
-      
-      const parsed = JSON.parse(jsonText) as ScanResult;
-      
-      setProgress(100);
-      clearInterval(interval);
-      
-      setResult(parsed);
-      
-      // Save to Firestore if logged in
-      if (isLoggedIn) {
-        try {
-          const id = await saveScan({
-            type: parsed.imageType,
-            imageURL: preview || '',
-            status: 'AI Ready',
-            findings: parsed.findings,
-            summary: parsed.summary,
-            recommendation: parsed.recommendation,
-          });
-          setScanId(id);
-          if (preview) {
-            localStorage.setItem(`scan_img_${id}`, preview);
-          }
-        } catch (dbError) {
-          console.error('Failed to save:', dbError);
+    setProgress(85);
+    
+    console.log('OpenRouter response:', rawText);
+    
+    // Parse JSON response
+    let jsonText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) jsonText = jsonMatch[0];
+    
+    const parsed = JSON.parse(jsonText) as ScanResult;
+    
+    setProgress(100);
+    clearInterval(interval);
+    
+    setResult(parsed);
+    
+    // Save to Firestore if logged in
+    if (isLoggedIn) {
+      try {
+        const id = await saveScan({
+          type: parsed.imageType,
+          imageURL: preview || '',
+          status: 'AI Ready',
+          findings: parsed.findings,
+          summary: parsed.summary,
+          recommendation: parsed.recommendation,
+        });
+        setScanId(id);
+        if (preview) {
+          localStorage.setItem(`scan_img_${id}`, preview);
         }
+      } catch (dbError) {
+        console.error('Failed to save:', dbError);
       }
-      
-      setStage('done');
-      
-    } catch (err: any) {
-      console.error('Analysis failed:', err);
-      setStage('error');
-      setErrorMsg(err.message || 'Analysis failed. Please try again with a different image.');
     }
-  };
+    
+    setStage('done');
+    
+  } catch (err: any) {
+    console.error('Analysis failed:', err);
+    setStage('error');
+    setErrorMsg(err.message || 'Analysis failed. Please try again with a different image.');
+  }
+};
 
   const reset = () => {
     setStage('idle');
