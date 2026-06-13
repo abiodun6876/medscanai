@@ -7,6 +7,8 @@ import { getScan, validateScan, ScanRecord } from '../../../lib/firebaseDb';
 import { subscribeToAuth, getUserProfile } from '../../../lib/firebaseAuth';
 import { FindingCard } from '../../../components/FindingCard';
 import { AiChatPanel } from '../../../components/AiChatPanel';
+import { MedicationCard } from '../../../components/MedicationCard';
+import { InteractiveImage } from '../../../components/InteractiveImage';
 import { User } from 'firebase/auth';
 
 const sevOrder: Record<string, number> = { high: 0, medium: 1, low: 2, normal: 3 };
@@ -307,6 +309,20 @@ export default function ReportPage() {
                   </p>
                 </div>
               )}
+
+              {/* Medications */}
+              {scan.medications && scan.medications.length > 0 && (
+                <div className="glass-card rounded-2xl p-6 print:border print:border-gray-200 print:rounded-none">
+                  <h2 className="font-display font-semibold text-white print:text-black flex items-center gap-2 mb-4">
+                    <span className="text-xl">💊</span> Suggested Medications
+                  </h2>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {scan.medications.map((m, i) => (
+                      <MedicationCard key={i} med={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ── Right column ──────────────────────────────────────────────── */}
@@ -314,12 +330,11 @@ export default function ReportPage() {
 
               {/* Scan image */}
               {scan.imageURL && (
-                <div className="glass-card rounded-2xl overflow-hidden print:border print:border-gray-200 print:rounded-none">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                <div className="glass-card rounded-2xl overflow-hidden print:border print:border-gray-200 print:rounded-none relative">
+                  <InteractiveImage
                     src={scan.imageURL}
                     alt={`${scan.type} medical scan`}
-                    className="w-full object-contain bg-black max-h-64"
+                    className="w-full bg-black h-64 flex"
                   />
                   <p className="px-4 py-2 text-xs text-slate-600 text-center">{scan.type}</p>
                 </div>

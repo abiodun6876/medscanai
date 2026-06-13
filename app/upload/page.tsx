@@ -2,10 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { saveScan, ScanFinding, getRecentScans } from '../../lib/firebaseDb';
+import { saveScan, ScanFinding, getRecentScans, MedicationSuggestion } from '../../lib/firebaseDb';
 import { auth } from '../../lib/firebase';
 import { FindingCard } from '../../components/FindingCard';
 import { AiChatPanel } from '../../components/AiChatPanel';
+import { MedicationCard } from '../../components/MedicationCard';
 
 type Stage = 'idle' | 'analysing' | 'done' | 'error';
 
@@ -14,6 +15,7 @@ interface ScanResult {
   summary: string;
   findings: ScanFinding[];
   recommendation: string;
+  medications?: MedicationSuggestion[];
   fallback?: boolean;
 }
 
@@ -43,7 +45,19 @@ JSON schema (respond ONLY with this — no markdown, no code fences, no explanat
       "notes":      "string — 1-3 sentence clinical description with relevant measurements where possible"
     }
   ],
-  "recommendation": "string — concise clinical recommendation paragraph"
+  "recommendation": "string — concise clinical recommendation paragraph",
+  "medications": [
+    {
+      "name": "string",
+      "type": "OTC | Prescription | Natural",
+      "dosage": "string",
+      "frequency": "string",
+      "duration": "string",
+      "sideEffects": ["string"],
+      "warnings": ["string"],
+      "notes": "string"
+    }
+  ]
 }
 
 Rules:
@@ -251,6 +265,7 @@ export default function UploadPage() {
             findings: parsed.findings,
             summary: parsed.summary,
             recommendation: parsed.recommendation,
+            medications: parsed.medications || [],
           });
           setScanId(id);
           await loadRecentScans();
@@ -807,6 +822,22 @@ export default function UploadPage() {
                         </p>
                       </div>
                     </div>
+
+                    {/* Medications */}
+                    {result.medications && result.medications.length > 0 && (
+                      <div className={`rounded-2xl p-6 ${darkMode ? 'bg-slate-800/50' : 'bg-white/70 shadow-lg'}`}>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className={`text-xl font-semibold flex items-center gap-2 ${darkMode ? 'text-white' : 'text-slate-800'}`}>
+                            <span>💊</span> Suggested Medications
+                          </h3>
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {result.medications.map((m, i) => (
+                            <MedicationCard key={i} med={m} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

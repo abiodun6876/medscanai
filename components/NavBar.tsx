@@ -4,13 +4,16 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { subscribeToAuth, signOut } from '../lib/firebaseAuth';
+import { subscribeToAuth, signOut, getUserProfile } from '../lib/firebaseAuth';
 
 const navLinks = [
   { href: '/',          label: 'Home'      },
   { href: '/upload',    label: 'Upload'    },
+  { href: '/condition-scan', label: 'Condition Scan' },
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/reports',   label: 'Reports'   },
+  { href: '/chat',      label: 'Chat'      },
+  { href: '/learn',     label: 'Learn'     },
 ];
 
 export function NavBar() {
@@ -18,10 +21,19 @@ export function NavBar() {
   const router      = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user,       setUser]       = useState<User | null>(null);
+  const [role,       setRole]       = useState<string>('patient');
   const [scrolled,   setScrolled]   = useState(false);
 
   useEffect(() => {
-    const unsub = subscribeToAuth(setUser);
+    const unsub = subscribeToAuth(async (u) => {
+      setUser(u);
+      if (u) {
+        const profile = await getUserProfile(u.uid);
+        setRole(profile?.role || 'patient');
+      } else {
+        setRole('patient');
+      }
+    });
     return () => unsub();
   }, []);
 
@@ -76,6 +88,18 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          {role === 'admin' && (
+            <Link
+              href="/admin"
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                pathname === '/admin'
+                  ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
+                  : 'text-rose-400/80 hover:text-rose-300 hover:bg-slate-800/60'
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </div>
 
         {/* Auth area */}
@@ -148,6 +172,18 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          {role === 'admin' && (
+            <Link
+              href="/admin"
+              className={`block px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                pathname === '/admin'
+                  ? 'bg-rose-500/15 text-rose-300'
+                  : 'text-rose-400/80 hover:text-rose-300 hover:bg-slate-800/60'
+              }`}
+            >
+              Admin Dashboard
+            </Link>
+          )}
           <div className="pt-3 flex flex-col gap-2 border-t border-slate-800/60">
             {user ? (
               <>

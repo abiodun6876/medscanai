@@ -25,6 +25,17 @@ export interface ScanFinding {
   region:     string;
 }
 
+export interface MedicationSuggestion {
+  name: string;
+  type: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  sideEffects: string[];
+  warnings: string[];
+  notes: string;
+}
+
 export interface ScanRecord {
   id?:            string;
   uid:            string;
@@ -34,6 +45,8 @@ export interface ScanRecord {
   findings:       ScanFinding[];
   summary:        string;
   recommendation?: string;
+  medications?:   MedicationSuggestion[];
+  conditionDetails?: any;
   doctorNote?:    string;
   validated?:     boolean;
   createdAt?:     Timestamp | null;
@@ -143,6 +156,33 @@ export async function updateScanStatus(
 // ── Get all scans (doctor/clinic role — no uid filter) ────────────────────
 export async function getAllScans(): Promise<ScanRecord[]> {
   const q = query(collection(db, SCANS), orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return mapSnap(snap);
+}
+
+// ── Save a condition scan record ───────────────────────────────────────────
+export async function saveConditionScan(
+  data: Omit<ScanRecord, 'id' | 'uid' | 'createdAt' | 'updatedAt'>
+): Promise<string> {
+  const uid = auth.currentUser?.uid ?? 'anonymous';
+  const ref = await addDoc(collection(db, SCANS), {
+    ...data,
+    uid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+// ── Load condition scans for current user ──────────────────────────────────
+export async function getUserConditionScans(): Promise<ScanRecord[]> {
+  const uid = auth.currentUser?.uid ?? 'anonymous';
+  const q = query(
+    collection(db, SCANS),
+    where('uid', '==', uid),
+    where('type', '==', 'Visual Condition Scan'),
+    orderBy('createdAt', 'desc')
+  );
   const snap = await getDocs(q);
   return mapSnap(snap);
 }
